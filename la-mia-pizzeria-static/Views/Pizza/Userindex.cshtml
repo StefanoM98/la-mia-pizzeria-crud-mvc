@@ -14,7 +14,9 @@
         @foreach (Pizza pizza in Model)
         {
             <div class="card" style="width: 18rem;">
-                <img src="@pizza.Pathimg" class="card-img-top" alt="@pizza.Name">
+                <figure class="w-100 h-75 pb-3">
+                    <img src="@pizza.Pathimg" class="card-img-top" alt="@pizza.Name">
+                </figure>
                 <div class="card-body">
                     <h5 class="card-title">@pizza.Name</h5>
                     <p class="card-text">@pizza.Description</p>
