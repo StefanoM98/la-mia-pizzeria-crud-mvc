@@ -9,7 +9,7 @@ namespace la_mia_pizzeria_static.ValidazioniPersonalizzate
             if (value is string)
             {
                 string inputValue =(string)value;
-                if (inputValue == null || inputValue.Split(' ').Length <= 5) 
+                if (inputValue == null || inputValue.Split(' ').Length < 5) 
                 {
                     return new ValidationResult("La descrizione deve avere minimo 5 parole!");
 

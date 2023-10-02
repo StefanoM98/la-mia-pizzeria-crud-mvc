@@ -56,6 +56,11 @@ namespace la_mia_pizzeria_static.Controllers
                 return View("CreatePizza", nuovaPizza);
             }
 
+            if (nuovaPizza.Pathimg == null) 
+            {
+                nuovaPizza.Pathimg = "/img/default.jpg";
+            }
+
             using(PizzaContext db = new PizzaContext())
             {
                 db.pizze.Add(nuovaPizza);

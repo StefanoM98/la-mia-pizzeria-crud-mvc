@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace la_mia_pizzeria_static.Models
@@ -15,10 +16,7 @@ namespace la_mia_pizzeria_static.Models
         [ValidazioniPersonalizzate.ValidationString]
         [MaxLength(200, ErrorMessage = "La descrizione è troppo lunga, nessuno leggerà una descrizione cosi lunga")]
         public string Description { get; set; }
-
-        [Required(ErrorMessage = "L'immagine è obbligatoria")]
-
-        public string Pathimg {  get; set; }
+        public string? Pathimg { get; set; } = "/img/deafult.jpg";
 
         [Range(0.01, 20.99)]
         public float Price { get; set; }
