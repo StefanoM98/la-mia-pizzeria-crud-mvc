@@ -14,11 +14,11 @@
         @foreach (Pizza pizza in Model)
         {
             <div class="card" style="width: 18rem;">
-                <img src="~/img/@pizza.Pathimg" class="card-img-top" alt="@pizza.Name">
+                <img src="@pizza.Pathimg" class="card-img-top" alt="@pizza.Name">
                 <div class="card-body">
                     <h5 class="card-title">@pizza.Name</h5>
                     <p class="card-text">@pizza.Description</p>
-                    <p class="card-text">@pizza.Price</p>
+                    <p class="card-text">@pizza.Price €</p>
 
                 </div>
             </div>
