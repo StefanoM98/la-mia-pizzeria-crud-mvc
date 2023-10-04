@@ -57,7 +57,7 @@ namespace la_mia_pizzeria_static.Controllers
 
             PizzaFormModel model = new PizzaFormModel {Pizza = new Pizza(), Categorie = categorie};
 
-            return View("CreatePizza");
+            return View("CreatePizza", model);
         }
 
         [HttpPost]
@@ -110,17 +110,24 @@ namespace la_mia_pizzeria_static.Controllers
             if(!ModelState.IsValid)
             {
                 List<Categoria> categorie = _myDb.Categorie.ToList();
+
                 data.Categorie = categorie;
+
                 return View("UpdatePizza", data);
             }
 
             Pizza? pizzaDaEditare = _myDb.Pizze.Find(id);
+
             if(pizzaDaEditare != null)
             {
                 EntityEntry<Pizza> entityEntry = _myDb.Entry(pizzaDaEditare);
+
                 entityEntry.CurrentValues.SetValues(data.Pizza);
+
                 _myDb.SaveChanges();
+
                 return RedirectToAction("Index");
+
             } else
             {
                 return NotFound("Non è stata trovata la pizza da aggiornare");
