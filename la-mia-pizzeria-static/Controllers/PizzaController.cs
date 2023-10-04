@@ -1,6 +1,8 @@
 ﻿using la_mia_pizzeria_static.Database;
 using la_mia_pizzeria_static.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace la_mia_pizzeria_static.Controllers
 {
@@ -17,7 +19,7 @@ namespace la_mia_pizzeria_static.Controllers
         {
             using(PizzaContext db = new PizzaContext())
             {
-                List<Pizza> pizze = db.pizze.ToList<Pizza>();
+                List<Pizza> pizze = db.Pizze.ToList<Pizza>();
 
                 return View("Index", pizze);
              }
@@ -27,7 +29,7 @@ namespace la_mia_pizzeria_static.Controllers
         {
             using (PizzaContext db = new PizzaContext())
             {
-                List<Pizza> pizze = db.pizze.ToList<Pizza>();
+                List<Pizza> pizze = db.Pizze.ToList<Pizza>();
 
                 return View("Userindex", pizze);
             }
@@ -37,7 +39,7 @@ namespace la_mia_pizzeria_static.Controllers
         {
             using(PizzaContext db = new PizzaContext())
             {
-                Pizza? pizzaTrovata = db.pizze.Where(pizza=>pizza.Id==id).FirstOrDefault();
+                Pizza? pizzaTrovata = db.Pizze.Where(pizza=>pizza.Id==id).Include(pizza=>pizza.Categoria).FirstOrDefault();
                 if(pizzaTrovata == null) 
                 {
                     return NotFound($"La pizza con {id} non è nel nostro menù");
@@ -51,25 +53,31 @@ namespace la_mia_pizzeria_static.Controllers
         [HttpGet]
         public IActionResult CreatePizza()
         {
+            List<Categoria> categorie = _myDb.Categorie.ToList();
+
+            PizzaFormModel model = new PizzaFormModel {Pizza = new Pizza(), Categorie = categorie};
+
             return View("CreatePizza");
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult CreatePizza(Pizza nuovaPizza)
+        public IActionResult CreatePizza(PizzaFormModel data)
         {
             if (!ModelState.IsValid)
             {
-                return View("CreatePizza", nuovaPizza);
+                List<Categoria> categorie= _myDb.Categorie.ToList();
+                data.Categorie = categorie;
+                return View("CreatePizza", data);
             }
 
-            if (nuovaPizza.Pathimg == null) 
+            if (data.Pizza.Pathimg == null) 
             {
-                nuovaPizza.Pathimg = "/img/default.jpg";
+                data.Pizza.Pathimg = "/img/default.jpg";
             }
 
             
-             _myDb.pizze.Add(nuovaPizza);
+             _myDb.Pizze.Add(data.Pizza);
              _myDb.SaveChanges();
 
              return RedirectToAction("Index");
@@ -79,41 +87,45 @@ namespace la_mia_pizzeria_static.Controllers
         public IActionResult AggiornaPizza(int id)
         {
             
-            Pizza? pizzaDaEditare = _myDb.pizze.Where(pizza=>pizza.Id == id).FirstOrDefault();
+            Pizza? pizzaDaEditare = _myDb.Pizze.Where(pizza=>pizza.Id == id).FirstOrDefault();
 
             if(pizzaDaEditare == null)
             {
                 return NotFound($"La pizza con {id} non possibile modificarla!");
             } else
             {
-                return View("UpdatePizza", pizzaDaEditare);
+                List<Categoria> categorie = _myDb.Categorie.ToList();
+
+                PizzaFormModel model = new PizzaFormModel {Pizza = pizzaDaEditare, Categorie=categorie};
+
+                return View("UpdatePizza", model);
             }
             
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult AggiornaPizza(int id, Pizza pizzaModificata)
+        public IActionResult AggiornaPizza(int id, PizzaFormModel data)
         {
             if(!ModelState.IsValid)
             {
-                return View("UpdatePizza", pizzaModificata);
+                List<Categoria> categorie = _myDb.Categorie.ToList();
+                data.Categorie = categorie;
+                return View("UpdatePizza", data);
             }
-           
-                Pizza? pizzaDaEditare = _myDb.pizze.Where(pizza=>pizza.Id == id).FirstOrDefault();
-                if (pizzaDaEditare != null)
-                {
-                    pizzaDaEditare.Name = pizzaModificata.Name;
-                    pizzaDaEditare.Description= pizzaModificata.Description;
-                    pizzaDaEditare.Pathimg = pizzaModificata.Pathimg;
-                    pizzaDaEditare.Price = pizzaModificata.Price;
 
-                    _myDb.SaveChanges();
-                    return RedirectToAction("Index");
-                } else
-                {
-                    return NotFound("Non è stata trovata alcuna pizza da modificare");
-                }
+            Pizza? pizzaDaEditare = _myDb.Pizze.Find(id);
+            if(pizzaDaEditare != null)
+            {
+                EntityEntry<Pizza> entityEntry = _myDb.Entry(pizzaDaEditare);
+                entityEntry.CurrentValues.SetValues(data.Pizza);
+                _myDb.SaveChanges();
+                return RedirectToAction("Index");
+            } else
+            {
+                return NotFound("Non è stata trovata la pizza da aggiornare");
+            }
+                
         }
 
         [HttpPost]
@@ -121,11 +133,11 @@ namespace la_mia_pizzeria_static.Controllers
         public IActionResult CancellaPizza(int id)
         {
             
-                Pizza? pizzaDaCancellare = _myDb.pizze.Where(pizza => pizza.Id == id).FirstOrDefault();
+                Pizza? pizzaDaCancellare = _myDb.Pizze.Where(pizza => pizza.Id == id).FirstOrDefault();
 
                 if(pizzaDaCancellare != null)
                 {
-                    _myDb.pizze.Remove(pizzaDaCancellare);
+                    _myDb.Pizze.Remove(pizzaDaCancellare);
                     _myDb.SaveChanges();
                     return RedirectToAction("Index");
                 } else
