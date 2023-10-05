@@ -19,7 +19,7 @@ namespace la_mia_pizzeria_static.Controllers
         {
             using(PizzaContext db = new PizzaContext())
             {
-                List<Pizza> pizze = db.Pizze.ToList<Pizza>();
+                List<Pizza> pizze = db.Pizze.Include(pizza=>pizza.Categoria).ToList<Pizza>();
 
                 return View("Index", pizze);
              }

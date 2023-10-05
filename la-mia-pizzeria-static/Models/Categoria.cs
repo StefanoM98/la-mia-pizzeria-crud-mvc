@@ -16,5 +16,12 @@ namespace la_mia_pizzeria_static.Models
         public Categoria()
         {
         }
+
+        public Categoria(int id, string name)
+        {
+            Id = id;
+            Name = name;
+            
+        }
     }
 }
