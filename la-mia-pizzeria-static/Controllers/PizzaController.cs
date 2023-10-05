@@ -1,6 +1,7 @@
 ﻿using la_mia_pizzeria_static.Database;
 using la_mia_pizzeria_static.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -29,7 +30,7 @@ namespace la_mia_pizzeria_static.Controllers
         {
             using (PizzaContext db = new PizzaContext())
             {
-                List<Pizza> pizze = db.Pizze.ToList<Pizza>();
+                List<Pizza> pizze = db.Pizze.Include(pizza => pizza.Categoria).ToList<Pizza>();
 
                 return View("Userindex", pizze);
             }
@@ -39,10 +40,12 @@ namespace la_mia_pizzeria_static.Controllers
         {
             using(PizzaContext db = new PizzaContext())
             {
-                Pizza? pizzaTrovata = db.Pizze.Where(pizza=>pizza.Id==id).Include(pizza=>pizza.Categoria).FirstOrDefault();
+                Pizza? pizzaTrovata = db.Pizze.Where(pizza=>pizza.Id==id).Include(pizza=>pizza.Categoria).Include(pizza=>pizza.Gusti).FirstOrDefault();
+
                 if(pizzaTrovata == null) 
                 {
                     return NotFound($"La pizza con {id} non è nel nostro menù");
+
                 } else
                 {
                     return View("DettagliPizza", pizzaTrovata);
@@ -55,7 +58,20 @@ namespace la_mia_pizzeria_static.Controllers
         {
             List<Categoria> categorie = _myDb.Categorie.ToList();
 
-            PizzaFormModel model = new PizzaFormModel {Pizza = new Pizza(), Categorie = categorie};
+            List<SelectListItem> gustiSelezionati = new List<SelectListItem>();
+            
+            List<Gusto> gustiNelDb = _myDb.Gusti.ToList();
+
+            foreach(Gusto gusto in gustiNelDb)
+            {
+                gustiSelezionati.Add(new SelectListItem
+                {
+                    Text = gusto.Name,
+                    Value = gusto.Id.ToString(),
+                });
+            }
+
+            PizzaFormModel model = new PizzaFormModel {Pizza = new Pizza(), Categorie = categorie, Gusti = gustiSelezionati};
 
             return View("CreatePizza", model);
         }
@@ -67,8 +83,40 @@ namespace la_mia_pizzeria_static.Controllers
             if (!ModelState.IsValid)
             {
                 List<Categoria> categorie= _myDb.Categorie.ToList();
+
                 data.Categorie = categorie;
+
+                List<SelectListItem> gustiSelezionati = new List<SelectListItem>();
+                List<Gusto> gustiNelDb = _myDb.Gusti.ToList();
+
+                foreach(Gusto gusto in gustiNelDb)
+                {
+                    gustiSelezionati.Add(new SelectListItem
+                    {
+                        Text = gusto.Name,
+                        Value = gusto.Id.ToString(),
+                    });
+                }
+
+                data.Gusti = gustiSelezionati;
+
                 return View("CreatePizza", data);
+            }
+
+            data.Pizza.Gusti = new List<Gusto>();
+
+            if (data.gustoIdSelezionato != null)
+            {
+                foreach(string gustoSelezionato in data.gustoIdSelezionato)
+                {
+                    int intGustoSelezionato = int.Parse(gustoSelezionato);
+
+                    Gusto? gustoInDb = _myDb.Gusti.Where(gusto => gusto.Id == intGustoSelezionato).FirstOrDefault();
+                    if (gustoInDb != null)
+                    {
+                        data.Pizza.Gusti.Add(gustoInDb);
+                    }
+                }
             }
 
             if (data.Pizza.Pathimg == null) 
