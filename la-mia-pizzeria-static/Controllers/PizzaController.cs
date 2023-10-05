@@ -135,16 +135,30 @@ namespace la_mia_pizzeria_static.Controllers
         public IActionResult AggiornaPizza(int id)
         {
             
-            Pizza? pizzaDaEditare = _myDb.Pizze.Where(pizza=>pizza.Id == id).FirstOrDefault();
+            Pizza? pizzaDaEditare = _myDb.Pizze.Where(pizza=>pizza.Id == id).Include(pizza=> pizza.Gusti).FirstOrDefault();
 
             if(pizzaDaEditare == null)
             {
                 return NotFound($"La pizza con {id} non possibile modificarla!");
+
             } else
             {
                 List<Categoria> categorie = _myDb.Categorie.ToList();
 
-                PizzaFormModel model = new PizzaFormModel {Pizza = pizzaDaEditare, Categorie=categorie};
+                List<Gusto> gustiNelDb = _myDb.Gusti.ToList();
+                List<SelectListItem> gustiSelezionati = new List<SelectListItem>();
+
+                foreach(Gusto gusto in  gustiNelDb)
+                {
+                    gustiSelezionati.Add(new SelectListItem
+                    {
+                        Text = gusto.Name,
+                        Value = gusto.Id.ToString(),
+                        Selected = pizzaDaEditare.Gusti.Any(gustoScelto => gustoScelto.Id == gusto.Id),
+                    });
+                }
+
+                PizzaFormModel model = new PizzaFormModel {Pizza = pizzaDaEditare, Categorie=categorie, Gusti = gustiSelezionati};
 
                 return View("UpdatePizza", model);
             }
@@ -161,16 +175,47 @@ namespace la_mia_pizzeria_static.Controllers
 
                 data.Categorie = categorie;
 
+                List<Gusto> gustiNelDb = _myDb.Gusti.ToList();
+                List<SelectListItem> gustoSelezionato  = new List<SelectListItem>();
+
+                foreach(Gusto gusto in gustiNelDb)
+                {
+                    gustoSelezionato.Add(new SelectListItem
+                    {
+                        Text = gusto.Name,
+                        Value = gusto.Id.ToString(),
+                    });
+                }
+
+                data.Gusti = gustoSelezionato; 
+
                 return View("UpdatePizza", data);
             }
 
-            Pizza? pizzaDaEditare = _myDb.Pizze.Find(id);
+            Pizza? pizzaDaEditare = _myDb.Pizze.Where(pizza=>pizza.Id == id).Include(pizza=>pizza.Gusti).FirstOrDefault();
 
             if(pizzaDaEditare != null)
             {
-                EntityEntry<Pizza> entityEntry = _myDb.Entry(pizzaDaEditare);
+                pizzaDaEditare.Name = data.Pizza.Name;
+                pizzaDaEditare.Description = data.Pizza.Description;
+                pizzaDaEditare.Pathimg = data.Pizza.Pathimg;
+                pizzaDaEditare.Price = data.Pizza.Price;
+                pizzaDaEditare.CategoriaId = data.Pizza.CategoriaId;
 
-                entityEntry.CurrentValues.SetValues(data.Pizza);
+                if(data.gustoIdSelezionato != null)
+                {
+                    foreach(string gustoSelezionato in data.gustoIdSelezionato)
+                    {
+                        int intGustoSelzionato = int.Parse(gustoSelezionato);
+
+                        Gusto? gustoInDb = _myDb.Gusti.Where(gusto=>gusto.Id == intGustoSelzionato).FirstOrDefault();
+                        
+                        if (gustoInDb != null)
+                        {
+                            pizzaDaEditare.Gusti.Add(gustoInDb);
+                        }
+                    }
+                }
 
                 _myDb.SaveChanges();
 

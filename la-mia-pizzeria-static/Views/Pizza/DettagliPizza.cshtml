@@ -24,6 +24,24 @@
                 }
             </p>
             <p>
+                <strong>
+                    Gusti:
+                </strong>
+                @if(Model.Gusti != null && Model.Gusti.Count > 0)
+                {
+                    <ul>
+                        @foreach(Gusto gusti in Model.Gusti)
+                        {
+                            <li>@gusti.Name</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <span>Non hai associato alcun gusto a questa pizza!</span>
+                }
+            </p>
+            <p>
                 <strong>Contenuto:</strong>
                 @Model.Description
             </p>
