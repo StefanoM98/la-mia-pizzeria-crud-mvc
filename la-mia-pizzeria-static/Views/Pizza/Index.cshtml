@@ -12,11 +12,14 @@ else
     <div class="container">
         <div class="row">
             <div class="col-12">
+                @if (User.IsInRole("ADMIN"))
+                {
+                    <a class=" btn btn-primary" href="@Url.Action("CreatePizza", "Pizza")">
+                        Crea una nuova pizza qui!
+                    </a>
 
-                <a class=" btn btn-primary" href="@Url.Action("CreatePizza", "Pizza")">
-                    Crea una nuova pizza qui!
-                </a>
-
+                }
+               
                 <h1 class="my-5">Lista delle pizze</h1>
 
 
@@ -45,15 +48,17 @@ else
                                 <td>@pizza.Price</td>
                                 <td>
                                     <a class="btn btn-primary m-3" href="@Url.Action("Dettagli", "Pizza", new{id=pizza.Id})">Dettagli della pizza</a>
-                                    <a class="btn btn-primary m-3" href="@Url.Action("AggiornaPizza", "Pizza", new{id=pizza.Id})">Modifica la pizza</a>
-                                    <form asp-controller="Pizza" asp-action="CancellaPizza" asp-route-id="@pizza.Id" method="post">
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-primary m-3">
-                                            Cancella
-                                        </button>
-                                    </form>
-
-
+                                    @if (User.IsInRole("ADMIN"))
+                                    {
+                                        <a class="btn btn-primary m-3" href="@Url.Action("AggiornaPizza", "Pizza", new{id=pizza.Id})">Modifica la pizza</a>
+                                        <form asp-controller="Pizza" asp-action="CancellaPizza" asp-route-id="@pizza.Id" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-primary m-3">
+                                                Cancella
+                                            </button>
+                                        </form>
+                                    }
+         
                                 </td>
                             </tr>
                         }

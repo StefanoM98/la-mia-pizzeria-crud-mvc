@@ -1,5 +1,6 @@
 ﻿using la_mia_pizzeria_static.Database;
 using la_mia_pizzeria_static.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,8 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace la_mia_pizzeria_static.Controllers
 {
+
+    [Authorize]
     public class PizzaController : Controller
 
     {
@@ -53,6 +56,8 @@ namespace la_mia_pizzeria_static.Controllers
             }
         }
 
+        [Authorize(Roles = "ADMIN")]
+
         [HttpGet]
         public IActionResult CreatePizza()
         {
@@ -75,6 +80,8 @@ namespace la_mia_pizzeria_static.Controllers
 
             return View("CreatePizza", model);
         }
+
+        [Authorize(Roles = "ADMIN")]
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -131,6 +138,9 @@ namespace la_mia_pizzeria_static.Controllers
              return RedirectToAction("Index");
             
         }
+
+        [Authorize(Roles = "ADMIN")]
+
         [HttpGet]
         public IActionResult AggiornaPizza(int id)
         {
@@ -164,6 +174,9 @@ namespace la_mia_pizzeria_static.Controllers
             }
             
         }
+
+        [Authorize(Roles = "ADMIN")]
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -227,6 +240,9 @@ namespace la_mia_pizzeria_static.Controllers
             }
                 
         }
+
+        [Authorize(Roles = "ADMIN")]
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
